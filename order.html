@@ -1,0 +1,24 @@
+<!-- orders.html -->
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyurtmalar</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background-color: #1E1E1E; color: white; font-family: Arial, sans-serif; padding: 20px; }
+        button { background-color: #007BFF; color: white; border: none; padding: 10px; margin: 5px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .order-card { background-color: #333; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        img { max-width: 100%; height: auto; }
+    </style>
+</head>
+<body>
+    <h2>Buyurtmalar Yo'qlama</h2>
+    <select id="campaign-select"></select>
+    <div id="orders-list"></div>
+    <button id="save-btn" onclick="saveDecisions()">Saqlash</button>
+    <script src="static/app.js"></script>  <!-- app.js ni ulang -->
+</body>
+</html>

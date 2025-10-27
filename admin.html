@@ -1,0 +1,31 @@
+<!-- admin.html -->
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background-color: #1E1E1E; color: white; font-family: Arial, sans-serif; padding: 20px; }
+        button { background-color: #007BFF; color: white; border: none; padding: 10px; margin: 5px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <h2>Admin Panel</h2>
+    <h3>Ishchilar Yaratish</h3>
+    <input type="text" id="new-username" placeholder="Username">
+    <input type="password" id="new-password" placeholder="Password">
+    <button onclick="createUser()">Yaratish</button>
+
+    <h3>Do'konlarni Taqsimlash</h3>
+    <select id="admin-campaign-select"></select>
+    <select id="admin-user-select"></select>
+    <button onclick="assignCampaign()">Taqsimlash</button>
+
+    <h3>Statistika</h3>
+    <div id="stats-list"></div>
+    <script src="static/"></script>  <!-- app.js ni ulang -->
+</body>
+</html>
