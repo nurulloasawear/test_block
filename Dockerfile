@@ -1,10 +1,10 @@
 # Dockerfile
 FROM nginx:alpine
 
-# Nginx config faylini nusxalash
+# nginx.conf ni nginx papkasiga nusxalash
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Statik fayllarni nginx papkasiga nusxalash
+# Barcha fayllarni nginx html papkasiga nusxalash
 COPY . /usr/share/nginx/html
 
 # Port
