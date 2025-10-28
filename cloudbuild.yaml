@@ -1,27 +1,24 @@
 # cloudbuild.yaml
 steps:
-  # 1. Docker image yaratish
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
       - '-t'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$SHORT_SHA'
       - '.'
 
-  # 2. Image ni Artifact Registry’ga yuklash
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$SHORT_SHA'
 
-  # 3. Cloud Run ga deploy
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         gcloud run deploy order-app \
-          --image=us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$COMMIT_SHA \
+          --image=us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$SHORT_SHA \
           --region=us-central1 \
           --platform=managed \
           --allow-unauthenticated \
