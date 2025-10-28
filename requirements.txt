@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+requests
+python-telegram-bot
+fpdf2
+pdfplumber
+pillow
+apscheduler
+google-api-python-client
+google-auth
+cryptography
+

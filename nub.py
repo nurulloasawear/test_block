@@ -5,7 +5,8 @@ import requests
 from fastapi import FastAPI, Request, HTTPException, Depends
 from pydantic import BaseModel
 from telegram import Bot
-from fpdf import FPDF, XPos, YPos
+from fpdf import FPDF
+from fpdf.enums import XPos, YPos
 from PIL import Image
 from io import BytesIO
 import datetime
@@ -373,7 +374,7 @@ def start_ngrok():
     raise Exception("Ngrok tunnel not found")
 
 if __name__ == "__main__":
-    ngrok_thread = threading.Thread(target=start_ngrok)
-    ngrok_thread.start()
+    import os
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    port = int(os.getenv("PORT", 8080))  # Cloud Run $PORT ni o‘qiydi
+    uvicorn.run("nub:app", host="0.0.0.0", port=port)
