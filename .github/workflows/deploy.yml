@@ -29,5 +29,5 @@ jobs:
       - name: Configure Docker
         run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
-      - name: Deploy
+      - name: Build and Deploy
         run: gcloud builds submit --config=cloudbuild.yaml
