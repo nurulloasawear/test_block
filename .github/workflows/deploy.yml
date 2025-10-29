@@ -4,31 +4,22 @@ name: Deploy to Cloud Run
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v1
         with:
-          token_format: {{GCP_SA_KEY}}
-          workload_identity_provider: 'projects/506105434534/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
-          service_account: 'cloud-run-deployer@tensile-market-472816-k9.iam.gserviceaccount.com'
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Configure Docker
-        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+        uses: google-github-actions/setup-gcloud@v1
 
       - name: Build and Deploy
-        run: gcloud builds submit --config=cloudbuild.yaml
+        run: |
+          gcloud builds submit --config=cloudbuild.yaml
