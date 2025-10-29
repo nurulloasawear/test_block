@@ -1,29 +1,36 @@
-name: Build and Deploy to Cloud Run
+# .github/workflows/deploy.yml
+name: Deploy to Cloud Run
 
 on:
   push:
-    branches:
-      - main  # yoki master — sizda qaysi branch bo‘lsa
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   deploy:
-    name: Build & Deploy
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
 
     steps:
-      # 1️⃣ Kodni yuklash
-      - name: Checkout repository
+      - name: Checkout (toza)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # $COMMIT_SHA uchun
 
-      # 2️⃣ Google Cloud autentifikatsiya
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          token_format: 'access_token'
+          workload_identity_provider: 'projects/506105434534/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+          service_account: 'cloud-run-deployer@tensile-market-472816-k9.iam.gserviceaccount.com'
+
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
 
-      # 3️⃣ Cloud Build orqali deploy qilish
-      - name: Build and Deploy via Cloud Build
-        run: |
-          gcloud builds submit --config=cloudbuild.yaml
+      - name: Configure Docker
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+
+      - name: Build and Deploy (TOZA!)
+        run: gcloud builds submit --config=cloudbuild.yaml
