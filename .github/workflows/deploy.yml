@@ -1,27 +1,30 @@
-# .github/workflows/deploy.yml
-name: Deploy to Cloud Run
+# cloudbuild.yaml
 
-on:
-  push:
-    branches: [ main ]
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:${COMMIT_SHA:-latest}"
+      - '.'
 
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0   # $COMMIT_SHA uchun kerak
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:${COMMIT_SHA:-latest}"
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud run deploy order-app \
+          --image=us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:${COMMIT_SHA:-latest} \
+          --region=us-central1 \
+          --platform=managed \
+          --allow-unauthenticated \
+          --port=80 \
+          --quiet
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-
-      - name: Build and Deploy
-        run: |
-          gcloud builds submit --config=cloudbuild.yaml
+options:
+  logging: CLOUD_LOGGING_ONLY
