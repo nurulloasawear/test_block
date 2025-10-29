@@ -1,21 +1,18 @@
 # cloudbuild.yaml
 steps:
-  # 1. Toza Docker build (cache yo‘q!)
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
-      - '--no-cache'           # <--- CACHE YO‘Q!
+      - '--no-cache'
       - '-t'
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$COMMIT_SHA'
       - '.'
 
-  # 2. Image ni Artifact Registry’ga yuklash
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$COMMIT_SHA'
 
-  # 3. Cloud Run’da yangi revision yaratish (100% traffic)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -27,10 +24,4 @@ steps:
           --platform=managed \
           --allow-unauthenticated \
           --port=80 \
-          --no-traffic \
-          --quiet || true
-
-        gcloud run services update-traffic order-app \
-          --to-revisions=order-app-$(echo $COMMIT_SHA | cut -c1-7)=100 \
-          --region=us-central1 \
           --quiet
