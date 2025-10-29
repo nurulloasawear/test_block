@@ -1,5 +1,6 @@
 # cloudbuild.yaml
 steps:
+  # 1. Toza build (CACHE YO‘Q!)
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
@@ -8,11 +9,13 @@ steps:
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$COMMIT_SHA'
       - '.'
 
+  # 2. Push
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$COMMIT_SHA'
 
+  # 3. Deploy + 100% traffic
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -24,4 +27,13 @@ steps:
           --platform=managed \
           --allow-unauthenticated \
           --port=80 \
+          --set-env-vars=COMMIT_SHA=$COMMIT_SHA \
+          --quiet
+
+        # 100% traffic yangi revisionga
+        REVISION=$(gcloud run services describe order-app --region=us-central1 --format='value(status.latestReadyRevisionName)' --platform=managed)
+        gcloud run services update-traffic order-app \
+          --to-revisions=$REVISION=100 \
+          --region=us-central1 \
+          --platform=managed \
           --quiet
