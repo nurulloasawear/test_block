@@ -4,13 +4,13 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$SHORT_SHA'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$COMMIT_SHA'
       - '.'
 
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$SHORT_SHA'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$COMMIT_SHA'
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
@@ -18,7 +18,7 @@ steps:
       - '-c'
       - |
         gcloud run deploy order-app \
-          --image=us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$SHORT_SHA \
+          --image=us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$COMMIT_SHA \
           --region=us-central1 \
           --platform=managed \
           --allow-unauthenticated \
