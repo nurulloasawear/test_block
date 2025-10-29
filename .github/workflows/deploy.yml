@@ -1,30 +1,29 @@
-# cloudbuild.yaml
+name: Build and Deploy to Cloud Run
 
-steps:
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'build'
-      - '-t'
-      - "us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:${COMMIT_SHA:-latest}"
-      - '.'
+on:
+  push:
+    branches:
+      - main  # yoki master — sizda qaysi branch bo‘lsa
 
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - "us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:${COMMIT_SHA:-latest}"
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
 
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        gcloud run deploy order-app \
-          --image=us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:${COMMIT_SHA:-latest} \
-          --region=us-central1 \
-          --platform=managed \
-          --allow-unauthenticated \
-          --port=80 \
-          --quiet
+    steps:
+      # 1️⃣ Kodni yuklash
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-options:
-  logging: CLOUD_LOGGING_ONLY
+      # 2️⃣ Google Cloud autentifikatsiya
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      # 3️⃣ Cloud Build orqali deploy qilish
+      - name: Build and Deploy via Cloud Build
+        run: |
+          gcloud builds submit --config=cloudbuild.yaml
