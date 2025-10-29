@@ -1,38 +1,36 @@
 # cloudbuild.yaml
-
 steps:
-  # 1️⃣ Docker image build bosqichi
+  # 1. Toza Docker build (cache yo‘q!)
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
+      - '--no-cache'           # <--- CACHE YO‘Q!
       - '-t'
-      - "us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:${COMMIT_SHA:-latest}"
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$COMMIT_SHA'
       - '.'
 
-  # 2️⃣ Image’ni push qilish bosqichi
+  # 2. Image ni Artifact Registry’ga yuklash
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - "us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:${COMMIT_SHA:-latest}"
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$COMMIT_SHA'
 
-  # 3️⃣ Cloud Run’ga deploy qilish bosqichi
+  # 3. Cloud Run’da yangi revision yaratish (100% traffic)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         gcloud run deploy order-app \
-          --image=us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:${COMMIT_SHA:-latest} \
+          --image=us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/order-app:$COMMIT_SHA \
           --region=us-central1 \
           --platform=managed \
           --allow-unauthenticated \
           --port=80 \
+          --no-traffic \
+          --quiet || true
+
+        gcloud run services update-traffic order-app \
+          --to-revisions=order-app-$(echo $COMMIT_SHA | cut -c1-7)=100 \
+          --region=us-central1 \
           --quiet
-
-# 🧱 ixtiyoriy: substitutsiyalar (kerak bo‘lsa)
-substitutions:
-  _SERVICE_NAME: "order-app"
-
-# 🔒 build ruxsatlari
-options:
-  logging: CLOUD_LOGGING_ONLY
